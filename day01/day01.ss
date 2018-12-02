@@ -20,4 +20,4 @@
 	    (begin (displayln new-x) (exit))
 	    (cons new-x acc))))
       [0]
-      (repeat 1000 freqs))))
+      (repeat 200 freqs))))
