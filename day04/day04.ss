@@ -41,7 +41,7 @@
 	(for ((i (in-range minute (- 60 minute)))) (vector-set! sleep i 0)))))
   (make-shift date id sleep))
 
-(def (find-most-sleepy-guard shifts)
+(def (find-sleepiest-guard shifts)
   (def guards (make-hash-table))
   (for ((shift shifts))
     (let ((time-asleep (apply + (vector->list (shift-sleep shift)))))
@@ -55,12 +55,23 @@
       (set! total (map + total (vector->list (shift-sleep shift))))))
   (list-index (lambda (x) (= x (apply max total))) total))
 
+(def (find-sleepy shifts)
+  (def hash (make-hash-table))
+  (for* ((shift shifts)
+	 (i (in-range 60)))
+    (hash-update! hash
+		  [(shift-id shift) i]
+		  (lambda (x) (+ x (vector-ref (shift-sleep shift) i)))
+		  0))
+  (car (hash-fold (lambda (k v acc) (if (> v (cadr acc)) (list k v) acc)) '(0 0) hash)))
+
 (def (main . args)
   (def records-str
     (sort
      (call-with-input-file "input.txt" (lambda (p) (read-all p read-line)))
      string<?))
   (def shifts (map parse-shift (partition-shifts records-str)))
-  (def sleepy-guard (find-most-sleepy-guard shifts))
+  (def sleepy-guard (find-sleepiest-guard shifts))
   (def sleepy-minute (find-sleepiest-minute sleepy-guard shifts))
-  (displayln (* sleepy-guard sleepy-minute)))
+  (displayln (* sleepy-guard sleepy-minute))
+  (displayln (apply * (find-sleepy shifts))))
