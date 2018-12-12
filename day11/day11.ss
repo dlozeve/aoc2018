@@ -12,7 +12,7 @@
   (def rack-id (+ x 10))
   (- (hundreds-digit (* rack-id (+ (* rack-id y) serial-number))) 5))
 
-(def (largest-power-cell serial-number grid-size cell-size)
+(def (build-grid serial-number grid-size)
   (def grid (make-vector grid-size #f))
   (for ((i (in-range grid-size)))
     (vector-set! grid i (make-s32vector grid-size 0)))
@@ -35,6 +35,10 @@
 	(s32vector-set! cur-row j
 			(+ (s32vector-ref cur-row j)
 			   (if (> j 0) (s32vector-ref cur-row (- j 1)) 0))))))
+  grid)
+
+(def (largest-power-cell grid cell-size)
+  (def grid-size (vector-length grid))
   (def max -10000)
   (def max-idx [0 0])
   (for* ((i (in-range (- grid-size cell-size)))
@@ -51,5 +55,21 @@
 	  (set! max-idx [(1+ i) (1+ j)])))))
   (cons max max-idx))
 
+(def (largest-power-cell-size grid)
+  (def grid-size (vector-length grid))
+  (def max-size 0)
+  (def max -1000)
+  (def res #f)
+  (for ((size (in-range grid-size)))
+    (let ((x (largest-power-cell grid size)))
+      (when (> (car x) max)
+	(begin
+	  (set! max (car x))
+	  (set! max-size size)
+	  (set! res (cons size x))))))
+  res)
+
 (def (main (serial-number "9005") . args)
-  (displayln (largest-power-cell (string->number serial-number) 300 3)))
+  (def grid (build-grid (string->number serial-number) 300))
+  (displayln (largest-power-cell grid 3))
+  (displayln (largest-power-cell-size grid)))
